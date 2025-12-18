@@ -57,6 +57,9 @@ $expedientes = $db->getAllExpedientes();
 </head>
 <body>
     <div class="container">
+        <div class="logo-section">
+            <img src="img/logo.png" alt="Logo" class="logo">
+        </div>
         <div class="form-section">
             <h1>
                 <svg class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -92,7 +95,7 @@ $expedientes = $db->getAllExpedientes();
                     </div>
                 </div>
 
-                <button type="submit">Guardar Expediente</button>
+                <button type="submit">Guardar</button>
             </form>
         </div>
 
