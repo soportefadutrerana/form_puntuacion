@@ -1,6 +1,4 @@
-# Formulario de Puntuación con PostgreSQL
-
-Aplicación PHP para registrar y gestionar expedientes con puntuaciones usando PostgreSQL en Docker.
+# Formulario de Puntuación Operarios Utrebyte
 
 ## [REQUISITOS]
 
@@ -9,10 +7,10 @@ Aplicación PHP para registrar y gestionar expedientes con puntuaciones usando P
 
 ## [INSTALACIÓN Y CONFIGURACIÓN]
 
-### [1] Navegar al proyecto
+### [1] Ejecutar composer y crear .env
 
 ```bash
-cd form_puntuacion
+composer install
 ```
 
 ### [2] Levantar los contenedores
