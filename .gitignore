@@ -1,0 +1,39 @@
+# Dependencias de Composer
+vendor/
+composer.lock
+
+# Variables de entorno
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Docker
+.dockerignore
+
+# Volúmenes de base de datos
+postgres_data/
+
+# Archivos temporales
+tmp/
+temp/
+cache/
+
+# Node modules (si se usa)
+node_modules/
+package-lock.json
+
+# OS
+Thumbs.db
+.DS_Store

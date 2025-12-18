@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: puntuacion_postgres
+    environment:
+      POSTGRES_DB: puntuacion_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+    networks:
+      - puntuacion_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  php:
+    image: php:8.2-apache
+    container_name: puntuacion_php
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "80:80"
+    volumes:
+      - ./public:/var/www/html
+      - ./src:/var/www/src
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: puntuacion_db
+      DB_USER: postgres
+      DB_PASSWORD: postgres_password
+    networks:
+      - puntuacion_network
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+volumes:
+  postgres_data:
+
+networks:
+  puntuacion_network:
+    driver: bridge
