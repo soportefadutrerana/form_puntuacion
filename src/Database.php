@@ -169,14 +169,15 @@ class Database
     }
 
     /**
-     * Obtener nombres únicos de expedientes
+     * Obtener nombres únicos de operarios (para el filtro de búsqueda)
      */
     public function getNombresUnicos()
     {
         try {
-            $query = "SELECT DISTINCT nombre_completo
-                      FROM expedientes
-                      ORDER BY nombre_completo ASC";
+            $query = "SELECT DISTINCT o.nombre_completo
+                      FROM operarios o
+                      INNER JOIN expedientes e ON e.operario_id = o.id
+                      ORDER BY o.nombre_completo ASC";
 
             $stmt = $this->pdo->query($query);
             return $stmt->fetchAll();

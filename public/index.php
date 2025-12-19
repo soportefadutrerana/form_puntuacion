@@ -27,12 +27,11 @@ try {
 // Obtener operarios activos
 try {
     $operarios_activos = $db->getOperariosActivos();
-    // Debug temporal
-    error_log('Operarios activos cargados: ' . count($operarios_activos));
-    error_log('Operarios: ' . print_r($operarios_activos, true));
 } catch (Exception $e) {
-    error_log('Error al cargar operarios: ' . $e->getMessage());
-    $response_message = '<div style="color: red; padding: 10px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; margin-bottom: 20px;">✗ Error al cargar operarios: ' . htmlspecialchars($e->getMessage()) . '</div>';
+    // Solo mostrar error si no estamos en una carga inicial
+    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+        $response_message = '<div style="color: red; padding: 10px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; margin-bottom: 20px;">✗ Error al cargar operarios: ' . htmlspecialchars($e->getMessage()) . '</div>';
+    }
 }
 
 // Mostrar mensaje de éxito si viene del redirect
@@ -183,15 +182,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (!isset($_POST['action']) || $_POST
                 </div>
                 <div class="form-group">
                     <label for="operario_id">Nombre Completo:</label>
-                    <!-- Debug: <?php echo count($operarios_activos); ?> operarios activos encontrados -->
                     <select id="operario_id" name="operario_id" required>
                         <option value="">-- Selecciona un operario --</option>
-                        <?php
-                        if (empty($operarios_activos)) {
-                            echo '<!-- No hay operarios activos disponibles -->';
-                        }
-                        foreach ($operarios_activos as $operario):
-                        ?>
+                        <?php foreach ($operarios_activos as $operario): ?>
                             <option value="<?php echo htmlspecialchars($operario['id']); ?>">
                                 <?php echo htmlspecialchars($operario['nombre_completo']); ?>
                             </option>
