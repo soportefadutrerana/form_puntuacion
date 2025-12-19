@@ -34,6 +34,12 @@ try {
     }
 }
 
+// Mostrar mensaje de error de la sesión si existe (debe mostrarse antes del mensaje de éxito)
+if (isset($_SESSION['error_message'])) {
+    $response_message = '<div style="color: red; padding: 10px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; margin-bottom: 20px;">✗ ' . htmlspecialchars($_SESSION['error_message']) . '</div>';
+    unset($_SESSION['error_message']); // Limpiar el mensaje después de mostrarlo
+}
+
 // Mostrar mensaje de éxito si viene del redirect
 if (isset($_GET['success']) && $_GET['success'] === '1') {
     $response_message = '<div style="color: green; padding: 10px; background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; margin-bottom: 20px;">✓ Expediente guardado correctamente</div>';
@@ -135,20 +141,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (!isset($_POST['action']) || $_POST
                 'fecha_expediente' => $fecha_expediente,
                 'respuestas' => $respuestas
             ];
-            
+
             // Insertar expediente
             $result = $db->insertExpediente($params);
-            
+
             if ($result) {
                 // Limpiar el POST y redirigir para evitar duplicados
                 header('Location: ' . $_SERVER['PHP_SELF'] . '?success=1');
                 exit();
             }
         } catch (Exception $e) {
-            $response_message = '<div style="color: red; padding: 10px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; margin-bottom: 20px;">✗ Error: ' . htmlspecialchars($e->getMessage()) . '</div>';
+            // Guardar error en sesión y redirigir
+            $_SESSION['error_message'] = 'Error: ' . $e->getMessage();
+            header('Location: ' . $_SERVER['PHP_SELF']);
+            exit();
         }
     } else {
-        $response_message = '<div style="color: red; padding: 10px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; margin-bottom: 20px;">✗ Errores: ' . htmlspecialchars(implode(", ", $errors)) . '</div>';
+        // Guardar errores en sesión y redirigir
+        $_SESSION['error_message'] = 'Errores: ' . implode(", ", $errors);
+        header('Location: ' . $_SERVER['PHP_SELF']);
+        exit();
     }
 }
 ?>
@@ -427,6 +439,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (!isset($_POST['action']) || $_POST
         <?php if (empty($expedientes_filtrados)): ?>
             <p style="padding: 20px; background-color: #f5f5f5; border-radius: 4px; text-align: center;">No se encontraron expedientes con los criterios especificados.</p>
         <?php else: ?>
+            <?php
+            // Calcular total de puntos
+            $total_puntos = 0;
+            foreach ($expedientes_filtrados as $exp) {
+                $total_puntos += $exp['puntuacion'];
+            }
+            ?>
+            <div style="margin-bottom: 20px; padding: 15px; background-color: #e7f3ff; border: 2px solid #2196F3; border-radius: 4px;">
+                <strong style="font-size: 18px;">Total de Expedientes:</strong> <?php echo count($expedientes_filtrados); ?> |
+                <strong style="font-size: 18px;">Total de Puntos:</strong> <span style="color: #2196F3; font-size: 20px;"><?php echo number_format($total_puntos, 2); ?></span>
+            </div>
             <table border="1">
                 <thead>
                     <tr>
