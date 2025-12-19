@@ -6,6 +6,7 @@ $db = new Database();
 $response_message = '';
 $checklist_items = [];
 $nombres_unicos = [];
+$operarios_activos = [];
 $expedientes_filtrados = [];
 $mostrar_filtrados = false;
 
@@ -21,6 +22,17 @@ try {
     $nombres_unicos = $db->getNombresUnicos();
 } catch (Exception $e) {
     // Silenciar errores al obtener nombres
+}
+
+// Obtener operarios activos
+try {
+    $operarios_activos = $db->getOperariosActivos();
+    // Debug temporal
+    error_log('Operarios activos cargados: ' . count($operarios_activos));
+    error_log('Operarios: ' . print_r($operarios_activos, true));
+} catch (Exception $e) {
+    error_log('Error al cargar operarios: ' . $e->getMessage());
+    $response_message = '<div style="color: red; padding: 10px; background-color: #f8d7da; border: 1px solid #f5c6cb; border-radius: 4px; margin-bottom: 20px;">✗ Error al cargar operarios: ' . htmlspecialchars($e->getMessage()) . '</div>';
 }
 
 // Mostrar mensaje de éxito si viene del redirect
@@ -49,16 +61,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // Procesar formulario de crear expediente (solo si no es búsqueda)
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && (!isset($_POST['action']) || $_POST['action'] !== 'buscar')) {
     $id_expediente = trim($_POST['id_expediente'] ?? '');
-    $nombre_completo = trim($_POST['nombre_completo'] ?? '');
+    $operario_id = trim($_POST['operario_id'] ?? '');
     $fecha_expediente = trim($_POST['fecha_expediente'] ?? '');
-    
+
     // Validaciones
     $errors = [];
     if (empty($id_expediente)) {
         $errors[] = 'El ID de expediente es requerido';
     }
-    if (empty($nombre_completo)) {
-        $errors[] = 'El nombre completo es requerido';
+    if (empty($operario_id)) {
+        $errors[] = 'Debe seleccionar un operario';
     }
 
     if (empty($errors)) {
@@ -119,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (!isset($_POST['action']) || $_POST
             // Preparar datos para insertar
             $params = [
                 'id_expediente' => $id_expediente,
-                'nombre_completo' => $nombre_completo,
+                'operario_id' => $operario_id,
                 'puntuacion' => $puntuacion,
                 'fecha_expediente' => $fecha_expediente,
                 'respuestas' => $respuestas
@@ -170,8 +182,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (!isset($_POST['action']) || $_POST
                     <input type="date" id="fecha_expediente" name="fecha_expediente" required>
                 </div>
                 <div class="form-group">
-                    <label for="nombre_completo">Nombre Completo:</label>
-                    <input type="text" id="nombre_completo" name="nombre_completo" required>
+                    <label for="operario_id">Nombre Completo:</label>
+                    <!-- Debug: <?php echo count($operarios_activos); ?> operarios activos encontrados -->
+                    <select id="operario_id" name="operario_id" required>
+                        <option value="">-- Selecciona un operario --</option>
+                        <?php
+                        if (empty($operarios_activos)) {
+                            echo '<!-- No hay operarios activos disponibles -->';
+                        }
+                        foreach ($operarios_activos as $operario):
+                        ?>
+                            <option value="<?php echo htmlspecialchars($operario['id']); ?>">
+                                <?php echo htmlspecialchars($operario['nombre_completo']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
                 
             </div>
