@@ -522,20 +522,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (!isset($_POST['action']) || $_POST
                 }
             }
 
-            // Sumar "Llamó a encargado" - contar si CUALQUIERA de los dos está marcado como Sí (solo si es visible)
+            // Sumar "Llamó a encargado" - 0.5 por cada uno marcado como Sí (solo si es visible)
             const llamoEnc1 = document.querySelector('input[name="llamo_encargado_1"]:checked');
             const llamoEnc2 = document.querySelector('input[name="llamo_encargado_2"]:checked');
             
-            let llamoEncVisible = false;
+            let contadorLlamoEnc = 0;
             if (llamoEnc1 && llamoEnc1.value === '1' && isVisible(llamoEnc1)) {
-                llamoEncVisible = true;
+                contadorLlamoEnc++;
             }
             if (llamoEnc2 && llamoEnc2.value === '1' && isVisible(llamoEnc2)) {
-                llamoEncVisible = true;
+                contadorLlamoEnc++;
             }
             
-            if (llamoEncVisible) {
-                total += 1.00;  // Suma 1.00 total, no 0.50 + 0.50
+            if (contadorLlamoEnc === 1) {
+                total += 0.50;  // 0.5 si solo uno está marcado
+            } else if (contadorLlamoEnc === 2) {
+                total += 1.00;  // 1.0 si ambos están marcados
             }
 
             document.getElementById('puntuacion').value = total.toFixed(2);
