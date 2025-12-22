@@ -480,6 +480,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (!isset($_POST['action']) || $_POST
             }
         }
 
+        // Función para verificar si un elemento es visible
+        function isVisible(element) {
+            // Recorrer el árbol DOM hacia arriba para verificar si algún elemento tiene la clase 'hidden'
+            let current = element;
+            while (current) {
+                if (current.classList && current.classList.contains('hidden')) {
+                    return false;
+                }
+                current = current.parentElement;
+            }
+            return true;
+        }
+
         // Puntuación con mapeo de items
         function calculateScore() {
             let total = 0;
@@ -501,19 +514,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && (!isset($_POST['action']) || $_POST
                 'expediente_cerrado': 0.25
             };
 
-            // Sumar puntos de items individuales marcados como "Sí" (value="1")
+            // Sumar puntos de items individuales marcados como "Sí" (value="1") y que sean visibles
             for (const [fieldName, points] of Object.entries(itemPoints)) {
                 const radio = document.querySelector(`input[name="${fieldName}"]:checked`);
-                if (radio && radio.value === '1') {
+                if (radio && radio.value === '1' && isVisible(radio)) {
                     total += points;
                 }
             }
 
-            // Sumar "Llamó a encargado" - contar si CUALQUIERA de los dos está marcado como Sí
+            // Sumar "Llamó a encargado" - contar si CUALQUIERA de los dos está marcado como Sí (solo si es visible)
             const llamoEnc1 = document.querySelector('input[name="llamo_encargado_1"]:checked');
             const llamoEnc2 = document.querySelector('input[name="llamo_encargado_2"]:checked');
             
-            if ((llamoEnc1 && llamoEnc1.value === '1') || (llamoEnc2 && llamoEnc2.value === '1')) {
+            let llamoEncVisible = false;
+            if (llamoEnc1 && llamoEnc1.value === '1' && isVisible(llamoEnc1)) {
+                llamoEncVisible = true;
+            }
+            if (llamoEnc2 && llamoEnc2.value === '1' && isVisible(llamoEnc2)) {
+                llamoEncVisible = true;
+            }
+            
+            if (llamoEncVisible) {
                 total += 1.00;  // Suma 1.00 total, no 0.50 + 0.50
             }
 
